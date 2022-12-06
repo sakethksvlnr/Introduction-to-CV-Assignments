@@ -1,17 +1,17 @@
-import cv2
+import cv2 as cv
 import numpy as np
 
 
 def extract_features_sift_and_stitch_images(frame1, frame2):
-    gray_1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-    gray_2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+    gray_1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
+    gray_2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
 
-    algortihm = cv2.SIFT_create()
+    algortihm = cv.SIFT_create()
 
     kp_img1, desc_img1 = algortihm.detectAndCompute(gray_1, None)
     kp_img2, desc_img2 = algortihm.detectAndCompute(gray_2, None)
 
-    bf = cv2.BFMatcher()
+    bf = cv.BFMatcher()
     matches = bf.knnMatch(desc_img2, desc_img1, k=2)
 
     features = []
@@ -24,24 +24,24 @@ def extract_features_sift_and_stitch_images(frame1, frame2):
     train_pts = np.float32([kp_img1[m.trainIdx]
                            .pt for m in features]).reshape(-1, 1, 2)
 
-    matrix, mask = cv2.findHomography(query_pts, train_pts, cv2.RANSAC, 5.0)
-    dst = cv2.warpPerspective(frame2, matrix, ((frame1.shape[1] + frame2.shape[1]), frame2.shape[0]))
+    matrix, mask = cv.findHomography(query_pts, train_pts, cv.RANSAC, 5.0)
+    dst = cv.warpPerspective(frame2, matrix, ((frame1.shape[1] + frame2.shape[1]), frame2.shape[0]))
     dst[0:frame1.shape[0], 0:frame1.shape[1]] = frame1
     return dst
 
 
 def visualize_image(frame_name, frame):
-    cv2.imshow(frame_name, frame)
-    cv2.imwrite(frame_name + "q4"+".jpg", frame)
-    if cv2.waitKey(0) == ord('q'):
-        cv2.destroyAllWindows()
+    cv.imshow(frame_name, frame)
+    cv.imwrite(frame_name + "q4"+".jpg", frame)
+    if cv.waitKey(0) == ord('q'):
+        cv.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    frame1 = cv2.imread('files/dahlberg1.jpg')
+    frame1 = cv.imread('files/dahlberg1.jpg')
     visualize_image("Frame1", frame1)
 
-    frame2 = cv2.imread('files/dahlberg2.jpg')
+    frame2 = cv.imread('files/dahlberg2.jpg')
     visualize_image("Frame2", frame2)
 
     stitched_image = extract_features_sift_and_stitch_images(frame1, frame2)
